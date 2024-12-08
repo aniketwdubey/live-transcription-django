@@ -7,47 +7,114 @@
         <h1>Transcribe Audio With Django</h1>
         <p id="status">Connection status will go here</p>
         <p id="transcript"></p>
-       
+        <button id="startButton">Start</button>
+        <button id="stopButton">Stop</button>
+<!-- 
         <script>
-           navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
-            if (!MediaRecorder.isTypeSupported('audio/webm'))
-                return alert('Browser not supported')
+            let mediaRecorder;
+            let socket;
 
-            const mediaRecorder = new MediaRecorder(stream, {
-                mimeType: 'audio/webm',
-            })
+            document.getElementById('startButton').addEventListener('click', () => {
+                navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+                    if (!MediaRecorder.isTypeSupported('audio/webm'))
+                        return alert('Browser not supported')
 
-            const socket = new WebSocket('ws://localhost:8000/listen')
+                    mediaRecorder = new MediaRecorder(stream, {
+                        mimeType: 'audio/webm',
+                    })
 
-            socket.onopen = () => {
-                document.querySelector('#status').textContent = 'Connected'
-                console.log({ event: 'onopen' })
-                mediaRecorder.addEventListener('dataavailable', async (event) => {
-                    if (event.data.size > 0 && socket.readyState == 1) {
-                        socket.send(event.data)
+                    socket = new WebSocket('ws://localhost:8000/listen')
+                    socket.onopen = () => {
+                        document.querySelector('#status').textContent = 'Connected'
+                        console.log({ event: 'onopen' })
+                        mediaRecorder.addEventListener('dataavailable', async (event) => {
+                            if (event.data.size > 0 && socket.readyState == 1) {
+                                socket.send(event.data)
+                            }
+                        })
+                        mediaRecorder.start(250)
                     }
+
+                    socket.onmessage = (message) => {
+                        const received = message.data
+                        if (received) {
+                            console.log(received)
+                            document.querySelector('#transcript').textContent += ' ' + received
+                        }
+                    }
+
+                    socket.onclose = () => {
+                        console.log({ event: 'onclose' })
+                    }
+
+                    socket.onerror = (error) => {
+                        console.log({ event: 'onerror', error })
+                    }
+                })
             })
-            mediaRecorder.start(250)
-            }
 
-            socket.onmessage = (message) => {
-                const received = message.data
-                if (received) {
-                    console.log(received)
-                    document.querySelector('#transcript').textContent += ' ' + received
+            document.getElementById('stopButton').addEventListener('click', () => {
+                if (mediaRecorder) {
+                    mediaRecorder.stop()
                 }
-           }
-
-           socket.onclose = () => {
-            console.log({ event: 'onclose' })
-        }
-
-            socket.onerror = (error) => {
-                console.log({ event: 'onerror', error })
-            }
-
-           })
-
+                if (socket) {
+                    socket.close()
+                }
+                document.querySelector('#status').textContent = 'Disconnected'
+            })
+        </script> -->
+        <script>
+            let mediaRecorder;
+            let socket;
+        
+            document.getElementById('startButton').addEventListener('click', () => {
+                navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+                    if (!MediaRecorder.isTypeSupported('audio/webm'))
+                        return alert('Browser not supported')
+        
+                    mediaRecorder = new MediaRecorder(stream, {
+                        mimeType: 'audio/webm',
+                    })
+        
+                    socket = new WebSocket('ws://localhost:8000/listen')
+                    socket.onopen = () => {
+                        document.querySelector('#status').textContent = 'Connected'
+                        console.log({ event: 'onopen' })
+                        mediaRecorder.addEventListener('dataavailable', async (event) => {
+                            if (event.data.size > 0 && socket.readyState == 1) {
+                                socket.send(event.data)
+                            }
+                        })
+                        mediaRecorder.start(250)
+                    }
+        
+                    socket.onmessage = (message) => {
+                        const received = message.data
+                        if (received) {
+                            console.log(received)
+                            document.querySelector('#transcript').textContent += ' ' + received
+                        }
+                    }
+        
+                    socket.onclose = () => {
+                        console.log({ event: 'onclose' })
+                    }
+        
+                    socket.onerror = (error) => {
+                        console.log({ event: 'onerror', error })
+                    }
+                })
+            })
+        
+            document.getElementById('stopButton').addEventListener('click', () => {
+                if (mediaRecorder) {
+                    mediaRecorder.stop()
+                }
+                if (socket) {
+                    socket.close()
+                }
+                document.querySelector('#status').textContent = 'Disconnected'
+            })
         </script>
     </body>
 </html>

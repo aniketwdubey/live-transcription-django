@@ -68,6 +68,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'stream.wsgi.application'
 
+SECRET_KEY='f&w5i$(et0y9j_btz=$(&hvpai7)mw7qm*u7#6m*)n0#gs7rwu'
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
